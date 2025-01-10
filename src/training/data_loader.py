@@ -57,7 +57,7 @@ class SummarizationDataLoader(LightningDataModule):
         Returns:
             DataLoader: The DataLoader for the training dataset.
         """
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn)
+        return DataLoader(self.val_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn)
 
     def val_dataloader(self) -> DataLoader:
         """

@@ -1,6 +1,8 @@
 """
-This package contains the data loader module which is responsible for loading the data from the dataset and preparing it for training the model.
+This file is used to import the classes from the data_loader.py 
+file and make them available to the other files in the training folder.
 """
 from .data_loader import SummarizationDataLoader
+from .summarizer import Summarizer
 
-__all__ = ["SummarizationDataLoader"]
+__all__ = ["SummarizationDataLoader", "Summarizer"]
