@@ -9,7 +9,5 @@ dependencies:
       - pytorch-lightning==2.5
       - transformers==4.47
       - datasets==3.2
-      - evaluate==0.4
-      - rouge-score==0.1
       - ipywidgets
       - sentencepiece

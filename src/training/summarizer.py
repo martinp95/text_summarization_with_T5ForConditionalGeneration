@@ -1,8 +1,8 @@
 from typing import Optional, Tuple, Dict, Any
 from pytorch_lightning import LightningModule
-from transformers import T5ForConditionalGeneration, T5Tokenizer, AdamW
+from transformers import T5ForConditionalGeneration, T5Tokenizer
 from torch import Tensor
-import evaluate
+from torch.optim import AdamW
 
 
 class Summarizer(LightningModule):
@@ -12,7 +12,6 @@ class Summarizer(LightningModule):
     Attributes:
         model (T5ForConditionalGeneration): The T5 model for conditional generation.
         lr (float): The learning rate for the optimizer.
-        rouge: The ROUGE score evaluator.
     """
 
     def __init__(self, model_name: str = 't5-small', lr: float = 1e-4):
@@ -24,11 +23,9 @@ class Summarizer(LightningModule):
             lr (float): The learning rate for the optimizer.
         """
         super().__init__()
-        self.model = T5ForConditionalGeneration.from_pretrained(
-            model_name)
+        self.model = T5ForConditionalGeneration.from_pretrained(model_name)
         self.tokenizer = T5Tokenizer.from_pretrained(model_name)
         self.lr = lr
-        self.rouge = evaluate.load('rouge')
 
     def forward(self, input_ids: Tensor, attention_mask: Tensor,
                 labels: Optional[Tensor] = None) -> Tuple[Tensor, Tensor]:
@@ -44,8 +41,7 @@ class Summarizer(LightningModule):
             Tuple[Tensor, Tensor]: The loss and logits from the model.
         """
         # Pass the inputs through the model
-        output = self.model(
-            input_ids, attention_mask=attention_mask, labels=labels)
+        output = self.model(input_ids, attention_mask=attention_mask, labels=labels)
         # Return the loss and logits
         return output.loss, output.logits
 

@@ -13,9 +13,11 @@ class SummarizationDataLoader(LightningDataModule):
         dataset_name (str): The name of the dataset to load.
         tokenizer (T5Tokenizer): The tokenizer to use for encoding the text.
         batch_size (int): The batch size for the dataloaders.
+        num_workers (int): The number of workers for the dataloaders.
     """
 
-    def __init__(self, dataset_name: str = 'FiscalNote/billsum', tokenizer_name: str = 't5-small', batch_size: int = 4):
+    def __init__(self, dataset_name: str = 'FiscalNote/billsum',
+                 tokenizer_name: str = 't5-small', batch_size: int = 4, num_workers: int = 4):
         """
         Initializes the DataLoader with the specified dataset, tokenizer, and batch size.
 
@@ -23,11 +25,13 @@ class SummarizationDataLoader(LightningDataModule):
             dataset_name (str): The name of the dataset to load.
             tokenizer_name (str): The name of the tokenizer to use.
             batch_size (int): The batch size for the dataloaders.
+            num_workers (int): The number of workers for the dataloaders.
         """
         super().__init__()
         self.dataset_name = dataset_name
         self.tokenizer = T5Tokenizer.from_pretrained(tokenizer_name)
         self.batch_size = batch_size
+        self.num_workers = num_workers
 
     def prepare_data(self) -> None:
         """
@@ -57,7 +61,8 @@ class SummarizationDataLoader(LightningDataModule):
         Returns:
             DataLoader: The DataLoader for the training dataset.
         """
-        return DataLoader(self.val_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size,
+                          collate_fn=self.collate_fn, num_workers=self.num_workers)
 
     def val_dataloader(self) -> DataLoader:
         """
@@ -66,7 +71,8 @@ class SummarizationDataLoader(LightningDataModule):
         Returns:
             DataLoader: The DataLoader for the validation dataset.
         """
-        return DataLoader(self.val_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn)
+        return DataLoader(self.val_dataset, batch_size=self.batch_size,
+                          collate_fn=self.collate_fn, num_workers=self.num_workers)
 
     def test_dataloader(self) -> DataLoader:
         """
@@ -75,7 +81,8 @@ class SummarizationDataLoader(LightningDataModule):
         Returns:
             DataLoader: The DataLoader for the test dataset.
         """
-        return DataLoader(self.test_dataset, batch_size=self.batch_size, collate_fn=self.collate_fn)
+        return DataLoader(self.test_dataset, batch_size=self.batch_size,
+                          collate_fn=self.collate_fn, num_workers=self.num_workers)
 
     def collate_fn(self, batch: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
