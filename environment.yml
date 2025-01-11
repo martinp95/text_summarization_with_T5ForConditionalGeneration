@@ -11,3 +11,4 @@ dependencies:
       - datasets==3.2
       - ipywidgets
       - sentencepiece
+      - streamlit==1.41
