@@ -7,8 +7,8 @@ dependencies:
   - pip:
       - torch==2.5
       - pytorch-lightning==2.5
-      - transformers==4.47
+      - transformers[sentencepiece]==4.47
       - datasets==3.2
       - ipywidgets
-      - sentencepiece
+      - evaluate==0.4
       - streamlit==1.41

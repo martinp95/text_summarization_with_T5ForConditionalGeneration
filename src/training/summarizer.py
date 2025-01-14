@@ -3,6 +3,7 @@ from pytorch_lightning import LightningModule
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 from torch import Tensor
 from torch.optim import AdamW
+from evaluate import load
 
 
 class Summarizer(LightningModule):
@@ -26,6 +27,7 @@ class Summarizer(LightningModule):
         self.model = T5ForConditionalGeneration.from_pretrained(model_name)
         self.tokenizer = T5Tokenizer.from_pretrained(model_name)
         self.lr = lr
+        self.rouge = load("rouge")
 
     def forward(self, input_ids: Tensor, attention_mask: Tensor,
                 labels: Optional[Tensor] = None) -> Tuple[Tensor, Tensor]:
@@ -80,6 +82,23 @@ class Summarizer(LightningModule):
         
         # Log the validation loss
         self.log('val_loss', loss, prog_bar=True, logger=True)
+        
+    def test_step(self, batch: Dict[str, Tensor], batch_idx: int):
+        """
+        Test step for the model.
+
+        Args:
+            batch (Dict[str, Tensor]): A batch of data containing input IDs, attention masks, and labels.
+            batch_idx (int): The index of the batch.
+        """
+        # Extract input IDs, attention masks, and labels from the batch
+        input_ids, attention_mask, labels = batch['input_ids'], batch['attention_mask'], batch['labels']
+
+        # Perform a forward pass and compute the loss
+        loss, _ = self(input_ids, attention_mask, labels)
+        
+        # Log the test loss
+        self.log('test_loss', loss, prog_bar=True, logger=True)
 
     def configure_optimizers(self) -> AdamW:
         """
