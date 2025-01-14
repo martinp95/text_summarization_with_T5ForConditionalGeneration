@@ -10,5 +10,4 @@ dependencies:
       - transformers[sentencepiece]==4.47
       - datasets==3.2
       - ipywidgets
-      - evaluate==0.4
       - streamlit==1.41

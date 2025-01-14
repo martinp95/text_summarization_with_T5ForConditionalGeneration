@@ -94,7 +94,8 @@ class SummarizationDataLoader(LightningDataModule):
         Returns:
             Dict[str, Any]: The collated batch with encoded text and summary.
         """
-        text = [item['text'] for item in batch]
+        prefix = "summarize: "
+        text = [prefix + item['text'] for item in batch]
         summary = [item['summary'] for item in batch]
 
         # Encode the text
