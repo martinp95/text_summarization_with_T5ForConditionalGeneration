@@ -7,25 +7,26 @@ from datasets import load_dataset
 
 class SummarizationDataLoader(LightningDataModule):
     """
-    DataLoader class for loading and processing datasets for text summarization using T5 model.
+    A PyTorch Lightning DataModule for preparing and loading datasets for text summarization tasks
+    using the T5 model. This class encapsulates dataset loading, tokenization, and DataLoader creation.
 
     Attributes:
-        dataset_name (str): The name of the dataset to load.
-        tokenizer (T5Tokenizer): The tokenizer to use for encoding the text.
-        batch_size (int): The batch size for the dataloaders.
-        num_workers (int): The number of workers for the dataloaders.
+        dataset_name (str): Name of the dataset to load (default: 'FiscalNote/billsum').
+        tokenizer (T5Tokenizer): Tokenizer for text processing.
+        batch_size (int): Number of samples per batch.
+        num_workers (int): Number of workers for DataLoader.
     """
 
     def __init__(self, dataset_name: str = 'FiscalNote/billsum',
                  tokenizer_name: str = 't5-small', batch_size: int = 4, num_workers: int = 4):
         """
-        Initializes the DataLoader with the specified dataset, tokenizer, and batch size.
+        Initializes the DataLoader with the specified dataset, tokenizer, batch size, and number of workers.
 
         Args:
-            dataset_name (str): The name of the dataset to load.
-            tokenizer_name (str): The name of the tokenizer to use.
-            batch_size (int): The batch size for the dataloaders.
-            num_workers (int): The number of workers for the dataloaders.
+            dataset_name (str): The name of the dataset to load (default: 'FiscalNote/billsum').
+            tokenizer_name (str): Pretrained tokenizer name or path (default: 't5-small').
+            batch_size (int): Number of samples per batch (default: 4).
+            num_workers (int): Number of workers for DataLoader (default: 4).
         """
         super().__init__()
         self.dataset_name = dataset_name
@@ -35,7 +36,9 @@ class SummarizationDataLoader(LightningDataModule):
 
     def prepare_data(self) -> None:
         """
-        Loads the dataset specified by the dataset_name attribute.
+        Loads the dataset specified by `dataset_name`.
+        Raises:
+            RuntimeError: If the dataset fails to load.
         """
         try:
             self.dataset = load_dataset(self.dataset_name)
@@ -45,10 +48,10 @@ class SummarizationDataLoader(LightningDataModule):
 
     def setup(self, stage: Optional[str] = None) -> None:
         """
-        Sets up the train, validation, and test datasets.
+        Prepares the train, validation, and test datasets for use in DataLoaders.
 
         Args:
-            stage (Optional[str]): The stage of the setup (e.g., 'fit', 'validate', 'test', 'predict').
+            stage (Optional[str]): Stage of the setup ('fit', 'validate', 'test', 'predict').
         """
         self.train_dataset = self.dataset['train']
         self.val_dataset = self.dataset['ca_test']
@@ -56,57 +59,74 @@ class SummarizationDataLoader(LightningDataModule):
 
     def train_dataloader(self) -> DataLoader:
         """
-        Returns the DataLoader for the training dataset.
+        Creates the DataLoader for the training dataset.
 
         Returns:
-            DataLoader: The DataLoader for the training dataset.
+            DataLoader: DataLoader instance for the training dataset.
         """
-        return DataLoader(self.train_dataset, batch_size=self.batch_size,
-                          collate_fn=self.collate_fn, num_workers=self.num_workers)
+        return DataLoader(
+            self.train_dataset, batch_size=self.batch_size,
+            collate_fn=self.collate_fn, num_workers=self.num_workers
+        )
 
     def val_dataloader(self) -> DataLoader:
         """
-        Returns the DataLoader for the validation dataset.
+        Creates the DataLoader for the validation dataset.
 
         Returns:
-            DataLoader: The DataLoader for the validation dataset.
+            DataLoader: DataLoader instance for the validation dataset.
         """
-        return DataLoader(self.val_dataset, batch_size=self.batch_size,
-                          collate_fn=self.collate_fn, num_workers=self.num_workers)
+        return DataLoader(
+            self.val_dataset, batch_size=self.batch_size,
+            collate_fn=self.collate_fn, num_workers=self.num_workers
+        )
 
     def test_dataloader(self) -> DataLoader:
         """
-        Returns the DataLoader for the test dataset.
+        Creates the DataLoader for the test dataset.
 
         Returns:
-            DataLoader: The DataLoader for the test dataset.
+            DataLoader: DataLoader instance for the test dataset.
         """
-        return DataLoader(self.test_dataset, batch_size=self.batch_size,
-                          collate_fn=self.collate_fn, num_workers=self.num_workers)
+        return DataLoader(
+            self.test_dataset, batch_size=self.batch_size,
+            collate_fn=self.collate_fn, num_workers=self.num_workers
+        )
 
     def collate_fn(self, batch: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        Collates a batch of data, encoding the text and summary using the tokenizer.
+        Tokenizes and encodes a batch of data for text summarization.
 
         Args:
-            batch (List[Dict[str, Any]]): A batch of data.
+            batch (List[Dict[str, Any]]): A batch of data, where each entry contains 'text' and 'summary' keys.
 
         Returns:
-            Dict[str, Any]: The collated batch with encoded text and summary.
+            Dict[str, Any]: A dictionary containing:
+                - input_ids: Encoded input text tensor.
+                - attention_mask: Attention mask tensor.
+                - labels: Encoded summary tensor with padding tokens ignored in loss computation.
         """
         prefix = "summarize: "
         text = [prefix + item['text'] for item in batch]
         summary = [item['summary'] for item in batch]
 
-        # Encode the text
+        # Encode the input text
         encodings = self.tokenizer(
-            text_target=text, max_length=1024, padding='max_length', truncation=True, return_tensors='pt'
+            text, max_length=1024, padding='max_length',
+            truncation=True, return_tensors='pt'
         )
 
-        # Encode the summary
+        # Encode the target summaries
         labels = self.tokenizer(
-            text_target=summary, max_length=128, padding='max_length', truncation=True, return_tensors='pt'
+            summary, max_length=128, padding='max_length',
+            truncation=True, return_tensors='pt'
         ).input_ids
 
-        labels[labels == 0] = -100  # To ignore pad tokens in loss computation
-        return dict(input_ids=encodings.input_ids, attention_mask=encodings.attention_mask, labels=labels)
+        # Replace padding tokens with -100 to ignore them during loss computation
+        labels[labels == 0] = -100
+
+        return {
+            "input_ids": encodings.input_ids,
+            "attention_mask": encodings.attention_mask,
+            "labels": labels
+        }

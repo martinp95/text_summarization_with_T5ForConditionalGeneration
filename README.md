@@ -1,21 +1,61 @@
-# Text Summarization Project
+# Text Summarization with T5ForConditionalGeneration
+This project provides a simple summarizer using fine-tuned T5ForConditionalGeneration model to generate text summarice
 
-## Overview
+## Table of Contents
+- [About](#about)
+- [Installation](#installation)
+- [Usage](#usage)
+- [License](#license)
+
+## About
 The Text Summarization Project aims to develop an abstractive summarization model using the T5 architecture, fine-tuned on the California state bill subset of the BillSum dataset. The primary goal is to create a tool that can efficiently summarize lengthy texts from newsletters and other sources, providing concise and informative summaries.
 
-## Project Structure
-The project is organized into the following directories and files:
+Key features:
+- Upload a text file for summarization.
+- Input custom text and generate summaries in real-time.
 
-- **src/**: 
+## Installation
 
-- **notebooks/**: Contains Jupyter notebooks for exploratory data analysis.
-  - `exploratory_data_analysis.ipynb`: Visualizations and insights derived from the dataset.
+1. Clone the repository:
+    ```sh
+    git clone https://github.com/martinp95/text_summarization_with_T5ForConditionalGeneration.git
+    cd text_summarization_with_T5ForConditionalGeneration
+    ```
 
-- **environment.yml**: Specifies the conda environment configuration, including all dependencies required for the project.
+2. Create and activate the Conda environment:
+    ```sh
+    conda env create -f environment.yml
+    conda activate text_summarization_with_T5ForConditionalGeneration
+    ```
 
-- **LICENSE**: Contains licensing information for the project.
+## Usage
+### Step 1: Fine-Tune the Model
+To fine-tune the model, use the Jupyter notebook `train_model.ipynb`. This notebook walks you through the steps of training the T5 model on the desired dataset.
 
-- **.gitignore**: Specifies files and directories to be ignored by Git.
+1. Open the notebook
+
+2. Execute the cells sequentially to fine-tune the model.
+
+3. Save the fine-tune model in the `fine_tuned/` direcotry
+
+### Step 2: Run the Application
+Once the model is fine-tuned and saved, you can launch the Streamlit application:
+
+1. Start the application:
+```sh
+cd ./src/
+streamlit run app.py
+```
+
+2. Open the local URL displayed in the terminal in your browser.
+![Summarization APP](/images/text_summarization_application.png)
+
+### Step 3: Using the Application
+* Upload a Text File: Upload a `.txt` file containing the text you want to summarize.
+![Uploaded File Summarization](/images/upload_file_summarization.png)
+
+* Manual Text Input: Use the input field to type or parte text directly
+![Manual Text Summarization](/images/manually_input_summarize.png)
 
 ## License
-This project is licensed under the terms specified in the LICENSE file.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
