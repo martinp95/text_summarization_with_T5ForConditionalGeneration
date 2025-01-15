@@ -1,5 +1,5 @@
 
-from typing import Optional, Tuple, Dict, Any
+from typing import Optional, Tuple, Dict
 from pytorch_lightning import LightningModule
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 from torch import Tensor
